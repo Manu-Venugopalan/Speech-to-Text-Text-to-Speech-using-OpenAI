@@ -1,0 +1,81 @@
+from pathlib import Path
+from openai import OpenAI
+
+
+# Text to Speech
+script = [
+    ("Advisor", "Good morning, Mr. Turner. I’m Priya Shah, a certified senior financial advisor at Canoda. I’ve been working in personal wealth management for over 12 years. How can I assist you today?"),
+    ("Client", "Good morning, Priya. I’m looking to invest in a Canoda financial product, but I’m not sure what suits me best."),
+    
+    ("Advisor", "Of course. Let’s begin by understanding your current situation. Could you confirm your full name and date of birth?"),
+    ("Client", "Sure. My name is James Turner, and I was born on March 5th, 1958."),
+    
+    ("Advisor", "Thank you. Are you currently employed or retired?"),
+    ("Client", "I’m retired. I worked as an accountant and retired three years ago. I don’t plan to return to work."),
+    
+    ("Advisor", "Understood. What are your main sources of income currently?"),
+    ("Client", "I receive a state pension and a private pension, totaling around £2,800 per month."),
+    
+    ("Advisor", "And approximately how much do you spend each month?"),
+    ("Client", "Around £1,900 to £2,000."),
+    
+    ("Advisor", "Do you have any outstanding mortgages or loans, like for your home or car?"),
+    ("Client", "No, both my home and vehicle are fully paid off."),
+    
+    ("Advisor", "Do you have any financial dependents?"),
+    ("Client", "Yes, my wife. She’s also retired."),
+    
+    ("Advisor", "In case of your passing, would you like your investment funds to be transferred to her?"),
+    ("Client", "Yes, she should be the nominee."),
+    
+    ("Advisor", "Thanks for confirming. Based on your profile, I’d recommend reviewing three Canoda financial products."),
+    
+    ("Advisor", "First, the Canoda Capital Protected Savings Bond. This product protects your original capital while offering up to 3.5 percent annual return, depending on market performance. It has a fixed term of five years and is ideal for clients who want minimal risk."),
+    
+    ("Advisor", "Second, the Balanced Growth Investment Plan. This is a moderate-risk portfolio with investments across equities, bonds, and funds. It has historically delivered annual returns between 5 to 6 percent, with the past 3 years averaging around 5.2 percent. You can access funds flexibly after three years."),
+    
+    ("Advisor", "Third, the Flexible Income Fund. It’s designed to provide a steady monthly or quarterly payout, with current returns averaging 4.2 percent. It’s best suited for clients seeking regular retirement income."),
+    
+    ("Client", "The Balanced Growth Plan sounds like a good balance. I’m okay with some risk for better returns."),
+    
+    ("Advisor", "That makes sense. Since your pension covers your monthly needs and you have no major liabilities, the Balanced Growth Plan could help grow your wealth effectively."),
+    
+    ("Advisor", "Would you like to proceed with that option?"),
+    ("Client", "Yes, let’s go ahead with the Balanced Growth Plan."),
+    
+    ("Advisor", "Perfect. I’ll document all the details we discussed today—including your personal and financial profile, nominee preferences, and product selection—and email them to you by the end of the day."),
+    
+    ("Advisor", "I’ll also arrange a callback in three days, giving you time to review everything and finalize your decision."),
+    
+    ("Client", "That sounds good. Thank you, Priya."),
+    
+    ("Advisor", "You’re very welcome, Mr. Turner. I look forward to speaking with you again soon.")
+]
+
+dialogue_text = "\n".join(f"{speaker}: {line}" for speaker, line in script)
+client = OpenAI(api_key="")
+
+audio_path = "/Programming/audio_transcribe/transcribe.mp3"
+
+with client.audio.speech.with_streaming_response.create(
+    model="gpt-4o-mini-tts",
+    voice="coral",
+    instructions="Speak in a cheerful and positive tone.",
+    input=dialogue_text
+) as response:
+    response.stream_to_file(audio_path)
+
+
+# Speech to Text 
+with open(audio_path, "rb") as audio_file:
+    transcription = client.audio.transcriptions.create(
+        model = "gpt-4o-mini-transcribe",
+        file=audio_file
+    )
+
+output_path = "/Programming/audio_transcribe/transcribe.txt"
+with open(output_path, "w", encoding="utf-8") as f:
+    f.write(transcription.text)
+
+
+
